@@ -1,0 +1,129 @@
+{
+  "name": "Smart Office Document Assistant — Workflow B — Documents API",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "documents",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -176,
+        -16
+      ],
+      "id": "5c950577-9485-413c-b600-e0ebebc23feb",
+      "name": "Webhook",
+      "webhookId": "EXAMPLE_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "EXAMPLE_SPREADSHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Final Project - Phase 01 - Document Processing Log",
+          "cachedResultUrl": "https://example.com/spreadsheets/d/EXAMPLE_SPREADSHEET_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Document Log",
+          "cachedResultUrl": "https://example.com/spreadsheets/d/EXAMPLE_SPREADSHEET_ID/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        48,
+        -16
+      ],
+      "id": "c6c55409-795a-4f1d-b08a-43b8a3d2e750",
+      "name": "Get row(s) in sheet"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"document_id\": \"{{ String($json['Document ID'] ?? '') }}\",\n  \"received_at\": \"{{ String($json['Received At'] ?? '') }}\",\n  \"file_name\": \"{{ String($json['File Name'] ?? '') }}\",\n  \"file_link\": \"{{ String($json['File Link'] ?? '') }}\",\n  \"document_type\": \"{{ String($json['Document Type'] ?? '') }}\",\n  \"sender_or_company\": \"{{ String($json['Sender / Company'] ?? '') }}\",\n  \"summary\": \"{{ String($json['Summary'] ?? '') }}\",\n  \"requested_action\": \"{{ String($json['Requested Action'] ?? '') }}\",\n  \"deadline\": \"{{ String($json['Deadline'] ?? '') }}\",\n  \"urgency\": \"{{ String($json['Urgency'] ?? '') }}\",\n  \"department\": \"{{ String($json['Department'] ?? '') }}\",\n  \"status\": \"{{ String($json['Status'] ?? '') }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        272,
+        -16
+      ],
+      "id": "75850ef8-cdc2-4e1c-81ab-2d2a5b894164",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        496,
+        -16
+      ],
+      "id": "3e5562fd-3a97-47cd-8d4d-fa742b8ab50f",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a8442912-4191-4405-8286-cc6becb5c34e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "EXAMPLE_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "78WEsMIAeFfgejtM",
+  "tags": []
+}

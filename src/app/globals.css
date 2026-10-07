@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+/* Hebrew-first, local font stack only. No external/runtime font downloads. */
+@theme inline {
+  --font-sans: Heebo, Rubik, Arial, sans-serif;
+  --color-background: #ffffff;
+  --color-foreground: #1a1a1a;
+  --color-muted: #5c5c5c;
+  --color-line: #e5e5e5;
+  --color-accent: #1d4ed8;
+  --color-notice-bg: #fff7ed;
+  --color-notice-fg: #7c2d12;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+}
+
+a {
+  color: var(--color-accent);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.focus\:not-sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}

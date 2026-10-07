@@ -1,0 +1,577 @@
+{
+  "name": "Smart Office Document Assistant — Workflow C — Review Update",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "review",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -64,
+        -144
+      ],
+      "id": "75d5fd61-1da4-4f02-9b25-15243beca27e",
+      "name": "Webhook",
+      "webhookId": "EXAMPLE_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body;\nconst isObject = body !== null && typeof body === 'object' && !Array.isArray(body);\nconst id = isObject ? body.document_id : undefined;\nconst status = isObject ? body.status : undefined;\nconst reviewer = isObject ? body.reviewed_by : undefined;\nconst notePresent = isObject && Object.prototype.hasOwnProperty.call(body, 'review_note');\nconst note = notePresent ? body.review_note : undefined;\nconst valid = typeof id === 'string' && id.length > 0\n  && (status === 'Reviewed' || status === 'Needs Review')\n  && typeof reviewer === 'string' && reviewer.length > 0\n  && (!notePresent || (typeof note === 'string' && note.length <= 200));\nreturn [{ json: {\n  valid,\n  document_id: valid ? id : null,\n  status: valid ? status : null,\n  reviewed_by: valid ? reviewer : null,\n  note_present: notePresent,\n  review_note: valid && notePresent ? note : null,\n} }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        -144
+      ],
+      "id": "83640b02-f5dc-4642-a8fe-82872aa7f2c4",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fdd66531-f5c2-4070-946c-2f70737fa9e5",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        400,
+        -128
+      ],
+      "id": "2dbaab8d-ab8d-4f42-b192-4c8798666b04",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "EXAMPLE_SPREADSHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Final Project - Phase 01 - Document Processing Log",
+          "cachedResultUrl": "https://example.com/spreadsheets/d/EXAMPLE_SPREADSHEET_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Document Log",
+          "cachedResultUrl": "https://example.com/spreadsheets/d/EXAMPLE_SPREADSHEET_ID/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Document ID",
+              "lookupValue": "={{ $json.document_id }}"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": false
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        672,
+        -160
+      ],
+      "id": "4632143e-447d-4f62-9a63-b1737c95769c",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const request = $('Code in JavaScript').first().json;\nconst rows = $input.all().map(item => item.json).filter(row => row && Object.keys(row).length > 0).filter(row => String(row['Document ID']) === request.document_id);\nconst route = rows.length === 0 ? 'not_found' : rows.length === 1 ? 'found' : 'duplicate';\nconst row = rows.length === 1 ? rows[0] : null;\nreturn [{ json: {\n  route,\n  match_count: rows.length,\n  document_id: request.document_id,\n  status: request.status,\n  reviewed_by: request.reviewed_by,\n  review_note: request.note_present ? request.review_note : (row ? row['Review Note'] ?? '' : ''),\n  row_number: row ? row.row_number ?? null : null,\n} }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        -112
+      ],
+      "id": "e34ef3e7-1441-465c-9eb8-706c1c933d99",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f1fe1b6b-8081-4048-a1a2-81bfd6cbbd6f",
+              "leftValue": "={{ $json.route }}",
+              "rightValue": "found",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1120,
+        -16
+      ],
+      "id": "19d46e9d-70de-4681-9e7d-d0a41e40d184",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "EXAMPLE_SPREADSHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Final Project - Phase 01 - Document Processing Log",
+          "cachedResultUrl": "https://example.com/spreadsheets/d/EXAMPLE_SPREADSHEET_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Document Log",
+          "cachedResultUrl": "https://example.com/spreadsheets/d/EXAMPLE_SPREADSHEET_ID/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Document ID": "={{ $json.document_id }}",
+            "Status": "={{ $json.status }}",
+            "Reviewed By": "={{ $json.reviewed_by }}",
+            "Review Note": "={{ $json.review_note }}"
+          },
+          "matchingColumns": [
+            "Document ID"
+          ],
+          "schema": [
+            {
+              "id": "Received At",
+              "displayName": "Received At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "File Name",
+              "displayName": "File Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "File Link",
+              "displayName": "File Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Document Type",
+              "displayName": "Document Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Sender / Company",
+              "displayName": "Sender / Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Summary",
+              "displayName": "Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Requested Action",
+              "displayName": "Requested Action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Deadline",
+              "displayName": "Deadline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Urgency",
+              "displayName": "Urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Department",
+              "displayName": "Department",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Document ID",
+              "displayName": "Document ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Reviewed By",
+              "displayName": "Reviewed By",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Review Note",
+              "displayName": "Review Note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1344,
+        -208
+      ],
+      "id": "a5e03471-7b5c-45cc-bf12-b17f26bb2f38",
+      "name": "Update row in sheet"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'updated', document_id: $('Code in JavaScript1').first().json.document_id }) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1568,
+        -208
+      ],
+      "id": "b622af43-f05d-4005-9a23-39bdc0d00934",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"status\":\"error\",\"message\":\"Invalid review request.\"}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        672,
+        48
+      ],
+      "id": "1bc76292-4fca-4748-ac64-373b862a659f",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2fda0462-abed-43d9-9917-bc5dcdccb397",
+              "leftValue": "={{ $json.route }}",
+              "rightValue": "not_found",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1344,
+        80
+      ],
+      "id": "416cde1c-52fd-40c4-9c69-21eec8c789ee",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"status\":\"error\",\"message\":\"Document not found.\"}",
+        "options": {
+          "responseCode": 404
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1568,
+        -16
+      ],
+      "id": "a37ad898-c823-43d1-92a4-4dcf6b342a48",
+      "name": "Respond to Webhook2"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"status\":\"error\",\"message\":\"Duplicate Document ID.\"}",
+        "options": {
+          "responseCode": 409
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1568,
+        176
+      ],
+      "id": "77ea39b0-03dd-4398-8746-274adab54318",
+      "name": "Respond to Webhook3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "9b8e3558-a935-4e67-bc3a-053662ce6846",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "EXAMPLE_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "zR6yQCLGUqwd6J8m",
+  "tags": []
+}

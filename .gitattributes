@@ -1,0 +1,4 @@
+# Checkpoint stability: the sanitized Part 1 baseline must be byte-identical (LF)
+# in the working tree, the index, and `git archive` output so it always matches
+# the SHA-256 recorded in n8n/baseline/BASELINE_MANIFEST.json.
+n8n/baseline/part1-baseline.json text eol=lf

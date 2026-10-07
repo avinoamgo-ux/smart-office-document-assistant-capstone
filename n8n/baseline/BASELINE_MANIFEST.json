@@ -1,0 +1,51 @@
+{
+  "artifact": "Part 1 baseline (Consciousness Center Document Assistant)",
+  "prompt": "2A",
+  "verification_date": "2026-09-07",
+  "immutable": true,
+
+  "raw_private_baseline": {
+    "path": "private/baseline/part1-baseline.raw.json",
+    "sha256_public_copy": "removed: hash of the unredacted private export, not published in this copy",
+    "git_status": "ignored-and-private",
+    "verification": "verify when present locally; a clean checkout or CI where this file is absent must NOT fail",
+    "note": "Original, unmodified n8n export. Never committed, never pushed. Its provenance hash is kept only in the private project repository."
+  },
+
+  "sanitized_tracked_baseline": {
+    "path": "n8n/baseline/part1-baseline.json",
+    "sha256": "5e049657f234db7fb72ede215e47e5a5b6b4de1864649d5ebf114faa2b4d516a",
+    "git_status": "tracked",
+    "verification": "always required",
+    "structural_checks": {
+      "workflow_name": "Final Project - Phase 01 - Consciousness Center Document Assistant",
+      "workflow_id": "OjXIBXA0HzK1ztN7",
+      "versionId": "af0cf5fb-df83-4f5e-9586-d39fb57155bb",
+      "active": true,
+      "node_count": 11,
+      "connections_source_nodes": 9,
+      "pinData_empty": true,
+      "dynamic_expressions": {
+        "download_file_fileId": "={{ $json.id }}",
+        "information_extractor_text": "={{ $json.data }}"
+      },
+      "no_private_or_account_specific_values": true
+    }
+  },
+
+  "synthetic_placeholders": [
+    "RECONNECT_CREDENTIAL_IN_N8N",
+    "EXAMPLE_INCOMING_DRIVE_FOLDER_ID",
+    "EXAMPLE_PROCESSED_DRIVE_FOLDER_ID",
+    "EXAMPLE_SPREADSHEET_ID",
+    "EXAMPLE_WEBHOOK_ID",
+    "EXAMPLE_INSTANCE_ID",
+    "example.user@example.com",
+    "https://example.com/"
+  ],
+
+  "_comment_forbidden_value_hashes": "Public copy: the SHA-256 hashes of the private raw values were removed, because they are derived from real private values. The list is empty here, so the hash-based scan in scripts/verify-privacy.mjs is skipped unless PRIVACY_HASHES_FILE points to a hash list kept outside this repository. See PUBLIC_COPY_NOTES.md.",
+  "forbidden_value_hashes": [],
+
+  "notes": "Prompt 2A: the raw baseline is preserved privately (see raw_private_baseline) and the tracked baseline (sanitized_tracked_baseline) is a redacted submission artifact. See n8n/baseline/README.md. The tracked and raw files intentionally differ; only the tracked hash is published in this copy."
+}
